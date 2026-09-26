@@ -1,3 +1,47 @@
-from django.shortcuts import render
+from rest_framework import viewsets, filters
+from django_filters.rest_framework import DjangoFilterBackend
 
-# Create your views here.
+from .models import Category, Product, Variation
+from .serializers import (
+    CategorySerializer,
+    ProductSerializer,
+    VariationSerializer,
+)
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+    filter_backends = [
+        DjangoFilterBackend,
+        filters.SearchFilter,
+        filters.OrderingFilter,
+    ]
+
+    filterset_fields = [
+        "category",
+        "is_available",
+    ]
+
+    search_fields = [
+        "product_name",
+        "description",
+    ]
+
+    ordering_fields = [
+        "price",
+        "created_at",
+        "product_name",
+    ]
+
+
+class VariationViewSet(viewsets.ModelViewSet):
+    queryset = Variation.objects.all()
+    serializer_class = VariationSerializer
