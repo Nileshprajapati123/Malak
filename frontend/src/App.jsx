@@ -1,122 +1,92 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import { ShopProvider } from './context/ShopContext';
+import { fetchCategories, fetchProducts, DEMO_CATEGORIES, DEMO_PRODUCTS } from './services/api';
+import Navbar from './components/Navbar';
+import HeroSlider from './components/HeroSlider';
+import CategoryPills from './components/CategoryPills';
+import ProductGrid from './components/ProductGrid';
+import DealOfTheDay from './components/DealOfTheDay';
+import StyleLookbook from './components/StyleLookbook';
+import CustomerReviews from './components/CustomerReviews';
+import Footer from './components/Footer';
+import CartDrawer from './components/CartDrawer';
+import WishlistModal from './components/WishlistModal';
+import QuickViewModal from './components/QuickViewModal';
+import AuthModal from './components/AuthModal';
+import SizeChartModal from './components/SizeChartModal';
+import Toast from './components/Toast';
 
-function App() {
-  const [count, setCount] = useState(0)
+function MainShop() {
+  const [categories, setCategories] = useState(DEMO_CATEGORIES);
+  const [products, setProducts] = useState(DEMO_PRODUCTS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadShopData() {
+      try {
+        const [cats, prods] = await Promise.all([
+          fetchCategories(),
+          fetchProducts(),
+        ]);
+        if (cats && cats.length > 0) setCategories(cats);
+        if (prods && prods.length > 0) setProducts(prods);
+      } catch (error) {
+        console.warn('Error loading remote store data, using local fallback:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadShopData();
+  }, []);
+
+  // Pick high-impact deal product
+  const dealProduct = products.find((p) => p.is_bestseller || p.discount_percent >= 40) || products[0];
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fcfbfa' }}>
+      {/* Navigation Bar */}
+      <Navbar />
 
-      <div className="ticks"></div>
+      {/* Main Content */}
+      <main style={{ flex: 1 }}>
+        {/* Hero Section */}
+        <HeroSlider />
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+        {/* Categories Showcase */}
+        <CategoryPills categories={categories} />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+        {/* Product Catalog Grid & Filters */}
+        <ProductGrid products={products} />
+
+        {/* Flash Sale / Deal of the Day */}
+        <DealOfTheDay dealProduct={dealProduct} />
+
+        {/* Complete Ensembles / Style Lookbook */}
+        <StyleLookbook />
+
+        {/* Customer Testimonials & Reviews */}
+        <CustomerReviews />
+      </main>
+
+      {/* Footer */}
+      <Footer />
+
+      {/* Global Interactive Drawers and Modals */}
+      <CartDrawer />
+      <WishlistModal />
+      <QuickViewModal />
+      <AuthModal />
+      <SizeChartModal />
+      <Toast />
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <ShopProvider>
+      <MainShop />
+    </ShopProvider>
+  );
+}
