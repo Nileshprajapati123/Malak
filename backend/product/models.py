@@ -21,7 +21,10 @@ class Category(models.Model):
         return self.category_name
 
     def get_url(self):
-        return reverse("products_by_category", args=[self.slug])
+        try:
+            return reverse("products_by_category", args=[self.slug])
+        except Exception:
+            return f"/category/{self.slug}"
 
 
 class Product(models.Model):
@@ -53,7 +56,10 @@ class Product(models.Model):
         return self.product_name
 
     def get_url(self):
-        return reverse("product_detail", args=[self.category.slug, self.slug])
+        try:
+            return reverse("product_detail", args=[self.category.slug, self.slug])
+        except Exception:
+            return f"/products/{self.slug}"
 
 
 class Variation(models.Model):

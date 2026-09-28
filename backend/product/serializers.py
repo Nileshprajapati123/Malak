@@ -28,13 +28,11 @@ class VariationSerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
-
     category_id = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),
         source="category",
         write_only=True
     )
-
     variations = VariationSerializer(
         many=True,
         read_only=True
@@ -57,7 +55,6 @@ class ProductSerializer(serializers.ModelSerializer):
             "updated_at",
             "variations",
         ]
-
         read_only_fields = [
             "id",
             "slug",
